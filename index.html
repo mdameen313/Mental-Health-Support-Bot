@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Support Bot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .app-header {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-icon {
+            background: #10b981;
+            border-radius: 8px;
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .header-subtitle {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+
+        .online-status {
+            color: #10b981;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+        }
+
+        /* Categories */
+        .categories-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .categories-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .category-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .category-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            border-left: 4px solid #10b981;
+        }
+
+        .category-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .category-desc {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Chat Container */
+        .chat-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .chat-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .chat-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .chat-subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Messages */
+        .message {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 18px;
+            word-wrap: break-word;
+            position: relative;
+        }
+
+        .user-message {
+            background: #10b981;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message {
+            background: #f3f4f6;
+            color: #374151;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .welcome-message {
+            background: #f3f4f6;
+            color: #374151;
+            align-self: center;
+            max-width: 80%;
+            text-align: center;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #e5e7eb;
+        }
+
+        .crisis-message {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            align-self: flex-start;
+            max-width: 80%;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+
+        /* Input Area */
+        .input-container {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            background: white;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            background: white;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .send-button {
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .send-button:hover {
+            background: #059669;
+        }
+
+        .send-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .disclaimer {
+            padding: 0.75rem 1.5rem;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.75rem;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        /* Sidebar */
+        .sidebar-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .crisis-item {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .crisis-name {
+            font-weight: 500;
+            color: #991b1b;
+        }
+
+        .crisis-number {
+            font-size: 0.8rem;
+            color: #7f1d1d;
+        }
+
+        .quick-button {
+            width: 100%;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            text-align: left;
+            transition: background-color 0.2s;
+        }
+
+        .quick-button:hover {
+            background: #f9fafb;
+        }
+
+        /* Loading animation */
+        .typing-indicator {
+            display: inline-block;
+            padding: 0.75rem 1rem;
+            background: #f3f4f6;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #9ca3af;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="app-header">
+            <div class="header-left">
+                <div class="header-icon">
+                    <span style="color: white; font-size: 1.5rem;">🧠</span>
+                </div>
+                <div>
+                    <div class="header-title">Mental Health Support Bot</div>
+                    <div class="header-subtitle">AI-Powered Emotional Assistant for India</div>
+                </div>
+            </div>
+            <div class="online-status">
+                <div class="status-dot"></div>
+                Online
+            </div>
+        </div>
+        
+        <!-- Categories -->
+        <div class="categories-section">
+            <div class="categories-title">Support Categories</div>
+            <div class="category-grid">
+                <div class="category-item">
+                    <div class="category-name">Anxiety & Stress</div>
+                    <div class="category-desc">Panic attacks, worry, academic pressure</div>
+                </div>
+                <div class="category-item">
+                    <div class="category-name">Depression & Mood</div>
+                    <div class="category-desc">Sadness, low energy, mood swings</div>
+                </div>
+                <div class="category-item">
+                    <div class="category-name">Relationships</div>
+                    <div class="category-desc">Family, friends, romantic issues</div>
+                </div>
+                <div class="category-item">
+                    <div class="category-name">Self-Care</div>
+                    <div class="category-desc">Coping strategies, wellness tips</div>
+                </div>
+                <div class="category-item">
+                    <div class="category-name">Academic Stress</div>
+                    <div class="category-desc">Exam anxiety, performance pressure</div>
+                </div>
+                <div class="category-item">
+                    <div class="category-name">Sleep Issues</div>
+                    <div class="category-desc">Insomnia, sleep quality, rest</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-layout">
+            <!-- Left Column - Chat -->
+            <div>
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <div class="chat-title">💬 Emotional Support Chat</div>
+                        <div class="chat-subtitle">Get emotional support, coping strategies, and crisis intervention when needed.</div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Messages will be inserted here by JavaScript -->
+                    </div>
+                    
+                    <div class="input-container">
+                        <div class="input-wrapper">
+                            <input type="text" class="chat-input" id="userInput" 
+                                   placeholder="Share your thoughts or feelings here... (e.g., I'm feeling anxious about exams)"
+                                   onkeypress="handleKeyPress(event)">
+                            <button class="send-button" id="sendButton" onclick="sendMessage()">Send</button>
+                        </div>
+                    </div>
+                    
+                    <div class="disclaimer">
+                        This chatbot provides emotional support but is not a replacement for professional mental health care.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column - Sidebar -->
+            <div>
+                <!-- Crisis Resources -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">🆘 Crisis Resources</div>
+                    <div class="crisis-item">
+                        <div class="crisis-name">AASRA</div>
+                        <div class="crisis-number">022-2754 6669 (24x7)</div>
+                    </div>
+                    <div class="crisis-item">
+                        <div class="crisis-name">Sneha Foundation</div>
+                        <div class="crisis-number">044-2464 0050 (24x7)</div>
+                    </div>
+                    <div class="crisis-item">
+                        <div class="crisis-name">Emergency</div>
+                        <div class="crisis-number">108 / 112</div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">🎯 Quick Support</div>
+                    <button class="quick-button" onclick="quickAction('breathing')">🫁 Breathing Exercise</button>
+                    <button class="quick-button" onclick="quickAction('grounding')">😌 Grounding Technique</button>
+                    <button class="quick-button" onclick="quickAction('affirmations')">💭 Positive Affirmations</button>
+                    <button class="quick-button" onclick="clearChat()">🗑️ Clear Chat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_KEY = "AIzaSyBwGpnVHNHlGOLKwSOU_YmEiZ_09FBz3_0";
+        const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent";
+        
+        // Crisis keywords
+        const crisisKeywords = [
+            'kill myself', 'suicide', 'want to die', 'end my life', 'hurt myself',
+            'cut myself', 'slice my hands', 'slice my neck', 'killing myself'
+        ];
+
+        // Initialize chat with welcome message
+        document.addEventListener('DOMContentLoaded', function() {
+            addWelcomeMessage();
+        });
+
+        function addWelcomeMessage() {
+            const chatMessages = document.getElementById('chatMessages');
+            const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+            
+            const welcomeMsg = `
+                <div class="message welcome-message">
+                    Welcome to the Mental Health Support Chatbot! I'm here to help you with emotional support and mental health guidance. You can share your feelings, ask about coping strategies, or discuss any mental health concerns. How can I assist you today?
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            chatMessages.innerHTML = welcomeMsg;
+        }
+
+        function addMessage(content, isUser = false, isCrisis = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+            
+            let messageClass = isUser ? 'user-message' : (isCrisis ? 'crisis-message' : 'ai-message');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${messageClass}`;
+            messageDiv.innerHTML = `
+                ${content}
+                <div class="message-time">${time}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        function detectCrisis(message) {
+            return crisisKeywords.some(keyword => message.toLowerCase().includes(keyword));
+        }
+
+        function getCrisisResponse() {
+            return `🚨 I'm extremely concerned about you. This is a life-threatening emergency.
+
+Please call immediately:
+📞 AASRA: 022-2754 6669 (24x7)
+📞 Sneha Foundation: 044-2464 0050 (24x7)
+📞 Emergency: 108
+
+Please go to the nearest hospital emergency room RIGHT NOW.`;
+        }
+
+        async function callGeminiAPI(prompt) {
+            try {
+                const response = await fetch(`${API_URL}?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: prompt
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 500
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates.length > 0) {
+                    return data.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error('No response from AI');
+                }
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                return "I'm having trouble connecting right now. Please try again in a moment.";
+            }
+        }
+
+        async function generateAIResponse(message) {
+            if (detectCrisis(message)) {
+                return { response: getCrisisResponse(), isCrisis: true };
+            }
+
+            const prompt = `You are a compassionate mental health support AI for Indian students. 
+            Provide empathetic, understanding, and supportive responses. You should:
+            - Listen actively and validate feelings
+            - Offer coping strategies when appropriate
+            - Suggest relaxation techniques
+            - Be non-judgmental and caring
+            - Encourage professional help when needed
+            
+            Keep responses warm but concise (2-4 sentences maximum).
+            
+            User message: ${message}
+            
+            Respond as a warm, understanding mental health supporter:`;
+
+            const response = await callGeminiAPI(prompt);
+            return { response, isCrisis: false };
+        }
+
+        async function sendMessage() {
+            const userInput = document.getElementById('userInput');
+            const sendButton = document.getElementById('sendButton');
+            const message = userInput.value.trim();
+            
+            if (!message) return;
+
+            // Disable input while processing
+            userInput.disabled = true;
+            sendButton.disabled = true;
+
+            // Add user message
+            addMessage(message, true);
+            userInput.value = '';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                // Generate AI response
+                const { response, isCrisis } = await generateAIResponse(message);
+                
+                // Remove typing indicator and add AI response
+                hideTypingIndicator();
+                addMessage(response, false, isCrisis);
+            } catch (error) {
+                hideTypingIndicator();
+                addMessage("Sorry, I encountered an error. Please try again.", false);
+            }
+
+            // Re-enable input
+            userInput.disabled = false;
+            sendButton.disabled = false;
+            userInput.focus();
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function quickAction(action) {
+            let message = '';
+            switch(action) {
+                case 'breathing':
+                    message = 'Can you guide me through a breathing exercise?';
+                    break;
+                case 'grounding':
+                    message = 'I need a grounding technique right now';
+                    break;
+                case 'affirmations':
+                    message = 'Please share some positive affirmations';
+                    break;
+            }
+            
+            if (message) {
+                document.getElementById('userInput').value = message;
+                sendMessage();
+            }
+        }
+
+        function clearChat() {
+            document.getElementById('chatMessages').innerHTML = '';
+            addWelcomeMessage();
+        }
+    </script>
+</body>
+</html>
